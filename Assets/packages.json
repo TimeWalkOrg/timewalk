@@ -1,0 +1,11 @@
+﻿{
+  "version": "0.1",
+  "exports": [
+    "Standard Assets",
+    "SampleScenes"
+  ],
+  "dependencies": [
+    "https://www.dropbox.com/s/t2o3a72458p2thr/Standard%20Assets-v0.1.unitypackage?dl=1",
+    "https://www.dropbox.com/s/9s2xg063jceqtbq/SampleScenes-v0.1.unitypackage?dl=0"
+  ]
+}
