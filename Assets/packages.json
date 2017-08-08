@@ -2,7 +2,8 @@
   "version": "0.1",
   "exports": [
     "Standard Assets",
-    "SampleScenes"
+    "SampleScenes",
+    "Fonts"
   ],
   "dependencies": [
     "https://www.dropbox.com/s/t2o3a72458p2thr/Standard%20Assets-v0.1.unitypackage?dl=1",
