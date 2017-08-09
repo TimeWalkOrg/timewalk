@@ -130,9 +130,8 @@ public class ExternalPackageManager
                     
                     return false;
                 }
+                lastProgress = www.progress;
             }
-
-            lastProgress = www.progress;
         }
 
         EditorUtility.ClearProgressBar();
