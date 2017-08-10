@@ -11,7 +11,7 @@ namespace TimeWalk.Platform {
         public static TWGameManager instance = null;
         
         // timewalk levels are years
-        public int year; 
+        public int year = 1989; 
         
         // Will need to rethink city and state for international locations
         public string city = "Twin Peaks";
