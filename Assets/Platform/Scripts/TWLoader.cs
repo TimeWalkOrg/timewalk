@@ -7,18 +7,38 @@ namespace TimeWalk.Platform {
     {
 
         public GameObject twGameManager; // TWGameManager prefab
-        public GameObject twSoundManager; // TWSoundManager prefab
+        // TODO
+        // public GameObject twSoundManager; // TWSoundManager prefab
 
-        // Use this for initialization
-        void Start()
-        {
+        public TWLocationInfo timeWalkLocationInfo = null;
+        public List<TWLevel> timeWalkLevels = null;
+        
+        void Awake()
+        {       
+            if (timeWalkLocationInfo == null)
+            {
+                timeWalkLocationInfo = new TWLocationInfo();
+            }
 
+            if(timeWalkLevels == null)
+            {
+                timeWalkLevels = new List<TWLevel>();
+            }
+
+            if (TWGameManager.instance == null)
+            {
+                //Instantiate the prefab
+                Instantiate(twGameManager);
+            }
         }
 
-        // Update is called once per frame
-        void Update()
+        void Start()
         {
-
+            // Load initial data
+            TWGameManager.instance.OnLocationInfoChanged(timeWalkLocationInfo);
+            
+            // TODO Handle start year
+            TWGameManager.instance.OnTimeWalkLevelsChanged(timeWalkLevels, timeWalkLevels[0]);
         }
     }
 }

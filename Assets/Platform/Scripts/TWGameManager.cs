@@ -10,20 +10,40 @@ namespace TimeWalk.Platform {
     {
         public static TWGameManager instance = null;
         
-        // timewalk levels are years
-        public int year = 1989; 
+        public TWLocationInfo timeWalkLocationInfo = null;
+
+        public List<TWLevel> timeWalkLevels = null;
+
+        public TWLevel currentLevel = null; 
+
+        public DateTime levelStartTime;
+
+
+        public event Action<TWLocationInfo> TWLocationInfoChanged;
         
-        // Will need to rethink city and state for international locations
-        public string city = "Twin Peaks";
-        public string state = "WA";
-        public Boolean isNight = false;
-        public Boolean isColor = true;
+        public void OnLocationInfoChanged(TWLocationInfo locationInfo)
+        {
+            if(TWLocationInfoChanged != null)
+            {
+                timeWalkLocationInfo = locationInfo;
+                TWLocationInfoChanged(locationInfo);
+            }
+        }
 
-        private DateTime startTime = DateTime.Now;
-        private GameObject timeWalkUI = null;
+        public event Action<List<TWLevel>, TWLevel> TWLevelsChanged;
 
-        // Use this for initialization
-        void Start()
+        public void OnTimeWalkLevelsChanged(List<TWLevel> levels, TWLevel current)
+        {
+            if (TWLevelsChanged != null)
+            {
+                levelStartTime = DateTime.Now;
+                timeWalkLevels = levels;
+                currentLevel = current;
+                TWLevelsChanged(timeWalkLevels, currentLevel);
+            }
+        }
+
+        void Awake()
         {
             // Singleton
             if (instance == null)
@@ -39,38 +59,23 @@ namespace TimeWalk.Platform {
             // Don't destroy this object when new scene is loaded 
             DontDestroyOnLoad(gameObject);
         }
+    }
 
-        // Update is called once per frame
-        void Update()
-        {
+    [System.Serializable]
+    public class TWLevel
+    {
+        public int year;
+        public string label;
+    }
 
-        }
-
-        // init for new scene
-        void InitScene()
-        {
-            UpdateUI();
-        }
-
-        // Update UI when info changes
-        void UpdateUI()
-        {
-            if (timeWalkUI == null) return;
-
-        }
-
-        // Makes sure only objects associated with year are enabled in scene
-        void FilterObjectsByYear()
-        {
-            // TODO
-        }
-
-        public void ChangeYear(int year)
-        {
-            // TODO
-        }
-        
-        // TODO ChangeLocation
+    [System.Serializable]
+    public class TWLocationInfo
+    {
+        // Will need to rethink city and state for international locations
+        public string city;
+        public string state;
+        public Boolean isNight;
+        public Boolean isColor;
     }
 }
 
