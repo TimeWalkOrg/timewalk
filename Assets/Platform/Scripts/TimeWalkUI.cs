@@ -40,10 +40,11 @@ namespace TimeWalk.Platform
         // Update is called once per frame
         void Update()
         {
-            // Update time if it has been greater than 1s
-            if(Time.timeSinceLevelLoad - lastclockUpdate > 1f)
+            // Update time if it has been greater than 60s
+            if(Time.timeSinceLevelLoad - lastclockUpdate > 60f)
             {
-                timeText.text = System.DateTime.Now.ToString("h:mm:ss tt");
+                // TODO use static start time in location info
+                timeText.text = System.DateTime.Now.ToString("h:mm tt");
                 lastclockUpdate = Time.timeSinceLevelLoad;
             }
         }
@@ -52,6 +53,7 @@ namespace TimeWalk.Platform
         {
             locationText.text = locationInfo.city + ", " + locationInfo.state;
             DateTime now = System.DateTime.Now;
+            // TODO use satic start month and day in location info
             dateText.text = now.ToString("MMMM, d ") + TWGameManager.instance.currentLevel.year;
         }
 
