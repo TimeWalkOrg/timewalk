@@ -1,3 +1,4 @@
+
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -37,3 +38,5 @@ sysinfo.txt
 /Builds/Packages
 /Assets/External.meta*
 /Assets/External/*
+
+.DS_Store
