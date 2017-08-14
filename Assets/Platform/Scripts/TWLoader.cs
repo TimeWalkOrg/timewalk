@@ -36,9 +36,7 @@ namespace TimeWalk.Platform {
         {
             // Load initial data
             TWGameManager.instance.OnLocationInfoChanged(timeWalkLocationInfo);
-            
-            // TODO Handle start year
-            TWGameManager.instance.OnTimeWalkLevelsChanged(timeWalkLevels, timeWalkLevels[0]);
+            TWGameManager.instance.OnTimeWalkLevelsChanged(timeWalkLevels);
         }
     }
 }

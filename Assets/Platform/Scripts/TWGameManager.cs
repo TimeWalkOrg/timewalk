@@ -19,31 +19,45 @@ namespace TimeWalk.Platform {
         public DateTime levelStartTime;
 
 
-        public event Action<TWLocationInfo> TWLocationInfoChanged;
+        public event Action TWLocationInfoChanged;
+        public event Action TWLevelsChanged;
+        public event Action TWLevelChanged;
         
         public void OnLocationInfoChanged(TWLocationInfo locationInfo)
         {
             if(TWLocationInfoChanged != null)
             {
                 timeWalkLocationInfo = locationInfo;
-                TWLocationInfoChanged(locationInfo);
+                TWLocationInfoChanged();
             }
         }
 
-        public event Action<List<TWLevel>, TWLevel> TWLevelsChanged;
-
-        public void OnTimeWalkLevelsChanged(List<TWLevel> levels, TWLevel current)
+        public void OnTimeWalkLevelsChanged(List<TWLevel> levels)
         {
-            if (TWLevelsChanged != null)
-            {
-                levelStartTime = DateTime.Now;
-                timeWalkLevels = levels;
-                currentLevel = current;
-                TWLevelsChanged(timeWalkLevels, currentLevel);
-            }
+			levelStartTime = DateTime.Now;
+			timeWalkLevels = levels;
+
+            timeWalkLevels.Sort();
+
+			if (TWLevelsChanged != null)
+			{
+				TWLevelsChanged();
+			}
+
+			SetCurrentLevel();
         }
 
-        void Awake()
+		public void OnTimeWalkLevelChanged(TWLevel current)
+		{
+			if (TWLevelChanged != null)
+			{
+				levelStartTime = DateTime.Now;
+				currentLevel = current;
+				TWLevelChanged();
+			}
+		}
+
+		void Awake()
         {
             // Singleton
             if (instance == null)
@@ -59,13 +73,47 @@ namespace TimeWalk.Platform {
             // Don't destroy this object when new scene is loaded 
             DontDestroyOnLoad(gameObject);
         }
+
+        private void SetCurrentLevel()
+        {
+			// Set current if null
+			if (currentLevel == null)
+			{
+				timeWalkLevels.ForEach(delegate (TWLevel l)
+				{
+					if (l.isDefault)
+					{
+						currentLevel = l;
+					}
+				});
+
+				// Just pick first level if no defaults
+				if (currentLevel == null)
+				{
+					currentLevel = timeWalkLevels[0];
+				}
+
+                TWLevelChanged();
+			}
+        }
     }
 
     [System.Serializable]
-    public class TWLevel
+    public class TWLevel : IComparable
     {
         public int year;
         public string label;
+        public Boolean isDefault;
+
+        public int CompareTo(object obj)
+        {
+            if (obj == null) return 1;
+            TWLevel otherLevel = obj as TWLevel;
+			if (otherLevel != null)
+				return this.year.CompareTo(otherLevel.year);
+			else
+				throw new ArgumentException("Object is not a TWLevel");
+        }
     }
 
     [System.Serializable]
@@ -76,6 +124,7 @@ namespace TimeWalk.Platform {
         public string state;
         public Boolean isNight;
         public Boolean isColor;
+        public DateTime startTime; // Time of day to start clock?
     }
 }
 
