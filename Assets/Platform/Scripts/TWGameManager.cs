@@ -9,22 +9,52 @@ namespace TimeWalk.Platform {
     public class TWGameManager : MonoBehaviour
     {
         public static TWGameManager instance = null;
-        
-        public TWLocationInfo timeWalkLocationInfo = null;
 
-        public List<TWLevel> timeWalkLevels = null;
-
-        public TWLevel currentLevel = null; 
-
+		public event Action TWLocationInfoChanged;
+		public event Action TWLevelsChanged;
+		public event Action TWLevelChanged;
         public DateTime levelStartTime;
+        
+        private TWLocationInfo timeWalkLocationInfo = null;
+        private List<TWLevel> timeWalkLevels = null;
+        private TWLevel currentLevel = null;
 
+		public List<TWLevel> TimeWalkLevels
+		{
+			get
+			{
+				return timeWalkLevels;
+			}
+		}
 
-        public event Action TWLocationInfoChanged;
-        public event Action TWLevelsChanged;
-        public event Action TWLevelChanged;
+        public TWLevel CurrentLevel
+        {
+            get
+            {
+                return currentLevel;
+            }
+        }
+
+		public TWLocationInfo TimeWalkLocationInfo
+		{
+			get
+			{
+				return timeWalkLocationInfo;
+			}
+		}
+
+        public Boolean DataReady()
+        {
+            return (timeWalkLevels != null &&
+                    currentLevel != null &&
+                    timeWalkLocationInfo != null);
+        }
+
         
         public void OnLocationInfoChanged(TWLocationInfo locationInfo)
         {
+            if (locationInfo == null) return;
+
             if(TWLocationInfoChanged != null)
             {
                 timeWalkLocationInfo = locationInfo;
@@ -34,6 +64,8 @@ namespace TimeWalk.Platform {
 
         public void OnTimeWalkLevelsChanged(List<TWLevel> levels)
         {
+            if (levels == null) return;
+
 			levelStartTime = DateTime.Now;
 			timeWalkLevels = levels;
 
@@ -49,6 +81,8 @@ namespace TimeWalk.Platform {
 
 		public void OnTimeWalkLevelChanged(TWLevel current)
 		{
+            if (current == null) return;
+
 			if (TWLevelChanged != null)
 			{
 				levelStartTime = DateTime.Now;
@@ -110,7 +144,7 @@ namespace TimeWalk.Platform {
             if (obj == null) return 1;
             TWLevel otherLevel = obj as TWLevel;
 			if (otherLevel != null)
-				return this.year.CompareTo(otherLevel.year);
+				return -1 * this.year.CompareTo(otherLevel.year);
 			else
 				throw new ArgumentException("Object is not a TWLevel");
         }

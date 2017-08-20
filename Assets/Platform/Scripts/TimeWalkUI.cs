@@ -18,8 +18,11 @@ namespace TimeWalk.Platform
         private Text fullLevelText;
         private GameObject slider;
         private GameObject track;
+        private GameObject handle;
         private GameObject menu;
-        private float lastclockUpdate;
+        private float lastClockUpdate;
+        private Range levelYearRange; //x=min,y=max
+        private Range slidePixelRange; //x=min,y=max
 
 
         // TODO Hide full help text after time period
@@ -36,6 +39,7 @@ namespace TimeWalk.Platform
             menu = GameObject.Find("Menu");
             slider = GameObject.Find("Slider");
             track = GameObject.Find("Track");
+            handle = GameObject.Find("Handle");
             fullLevelText = GameObject.Find("FullLevelText").GetComponent<Text>();
 
 			// Add commands
@@ -71,17 +75,12 @@ namespace TimeWalk.Platform
         void Start()
         {
             // Update UI (if ready)
-            /*
-            if(TWGameManager.instance.timeWalkLocationInfo != null && 
-               TWGameManager.instance.timeWalkLevels != null)
+            if(TWGameManager.instance.DataReady())
             {
-				
+				HandleLocationInfo();
+				HandleNewLevels();
+				HandleNewLevel();
 			}
-			*/
-			HandleLocationInfo();
-			HandleNewLevels();
-			HandleNewLevel();
-
 
             // Subscribe to changes
             TWGameManager.instance.TWLocationInfoChanged += HandleLocationInfo;
@@ -93,14 +92,14 @@ namespace TimeWalk.Platform
         void Update()
         {
             // Update time if it has been greater than 60s
-            if (Time.timeSinceLevelLoad - lastclockUpdate > 60f)
+            if (Time.timeSinceLevelLoad - lastClockUpdate > 60f)
             {
                 // TODO use static start time in location info
                 timeText.text = System.DateTime.Now.ToString("h:mm tt");
-                lastclockUpdate = Time.timeSinceLevelLoad;
+                lastClockUpdate = Time.timeSinceLevelLoad;
             }
 
-            // Invoke any commands the user pressed
+            // Invoke any commands from the user
             commands.ForEach(delegate (UIMenuCommand c)
             {
                 UIMenuCommand command = c;
@@ -113,92 +112,140 @@ namespace TimeWalk.Platform
 
         private void HandleLocationInfo()
         {
-            TWLocationInfo locationInfo = TWGameManager.instance.timeWalkLocationInfo;
+            TWLocationInfo locationInfo = TWGameManager.instance.TimeWalkLocationInfo;
+            TWLevel currentLevel = TWGameManager.instance.CurrentLevel;
             locationText.text = locationInfo.city + ", " + locationInfo.state;
-            DateTime now = System.DateTime.Now;
-            // TODO use satic start month and day in location info
-            dateText.text = now.ToString("MMMM, d ") + TWGameManager.instance.currentLevel.year;
         }
 
         private void HandleNewLevels()
         {
-            List<TWLevel> levels = TWGameManager.instance.timeWalkLevels;
-            Button currentLevel = null;
-            Button lastItem = null;
+            List<TWLevel> levels = TWGameManager.instance.TimeWalkLevels;
+            RectTransform lastItemRectTransform = null;
+
+            Slider sliderComp = slider.GetComponent<Slider>();
+            Rect sliderRect = slider.GetComponent<RectTransform>().rect;
+            float levelItemHeight = levelTextPrefab.GetComponent<RectTransform>().rect.height;
+
+            int maxYear = levels[0].year;
+            int minYear = levels[levels.Count - 1].year;
+
+            levelYearRange = new Range(minYear, maxYear);
+            // Figured out the appropriate pixel range through trial and error...
+            // There MUST be a better way.
+            slidePixelRange = new Range(levelItemHeight * 2, sliderRect.height + levelItemHeight + 10);
+
+            ClearLevels();
+
+            sliderComp.maxValue = maxYear;
+            sliderComp.minValue = minYear;
 
             levels.ForEach(delegate (TWLevel l)
             {
-				// Create menu item
-				Button item = Instantiate(levelTextPrefab, track.transform).GetComponent<Button>();
+                // Create menu item
+                Button item = Instantiate(levelTextPrefab, track.transform).GetComponent<Button>();
                 item.GetComponent<Text>().text = l.year.ToString();
+                item.name = "LevelTextItem" + l.year.ToString();
 
-                if(TWGameManager.instance.currentLevel.year == l.year)
-                {
-                    currentLevel = item;    
-                }
+                RectTransform itemRect = item.GetComponent<RectTransform>();
 
-                // Set position
-                if(lastItem != null)
-                {
-                    Vector3 pos = item.transform.position;
-                    pos.y = lastItem.transform.position.y + 
-                        lastItem.GetComponent<RectTransform>().rect.height;
-                    item.transform.position = pos;    
-                }
+                Vector3 pos = itemRect.position;
 
-                lastItem = item;
+                float maxYAvailable = slidePixelRange.Max;
+
+				// TODO Place item in it's normalized location, or if that is too 
+				// high then just below the last item.
+
+				//if (lastItemRectTransform != null)
+				//{
+				//	// Don't let the new item be placed above (or overlapping with) last item
+				//	maxYAvailable = lastItemRectTransform.position.y -
+				//				   lastItemRectTransform.rect.height;
+				//}
+
+                // Convert current year to corresponding pixel in y range
+                float yearInPixels = levelYearRange.Translate(l.year, slidePixelRange);
+
+                // 
+                // Place level on slide as close as possible to year in pixels
+                pos.y = Math.Min(maxYAvailable, yearInPixels);
+
+                itemRect.position = pos;
+
+                lastItemRectTransform = itemRect;
             });
+        }
+		
 
-            UpdateHandleUI();
-		}
-
-        private void HandleNewLevel(){
-            UpdateHandleUI();
-		}
-
-        private void UpdateHandleUI()
+        private void HandleNewLevel()
         {
-            TWLevel current = TWGameManager.instance.currentLevel;
-
-			// TODO Move slider handle position
+            TWLevel currentLevel = TWGameManager.instance.CurrentLevel;
+			
+            DateTime now = System.DateTime.Now;
+			
+            // Set Date
+            // TODO use satic start month and day in location info
+			dateText.text = now.ToString("MMMM, d ") + currentLevel.year;
 
 			// Update slider level text
-			fullLevelText.text = current.year + ": " + current.label;
-        }
+			fullLevelText.text = currentLevel.year + ": " + currentLevel.label;
+
+            // Move slider
+            slider.GetComponent<Slider>().value = currentLevel.year;
+
+            // Make sure slider handle is last sibling (for z order)
+            handle.GetComponent<Transform>().SetAsLastSibling();
+		}
                          
         // Slider handler
-        private void ChangeYear(int year){
+        private void ChangeYear(int year)
+        {
             // TODO
         }
 
         // Menu
-        private void ChangeYear(){
+        private void ChangeYear()
+        {
             // TODO
         }
 
-        private void ToggleNightDay(){
+        private void ToggleNightDay()
+        {
             // TODO
         }
 
-        private void ToggleColor(){
+        private void ToggleColor()
+        {
             // TODO
         }
 
-        private void ToggleComments(){
+        private void ToggleComments()
+        {
             // TODO
         }
 
-        private void ToggleHelp(){
+        private void ToggleHelp()
+        {
             // TODO
         }
 
-        private void Restart(){
+        private void Restart()
+        {
             // TODO
         }
 
-        private void Quit(){
+        private void Quit()
+        {
             // TODO
         }
+
+		private void ClearLevels()
+		{
+            GameObject[] levels = GameObject.FindGameObjectsWithTag("TimeWalkUILevelText");
+            for (int i = 0; i < levels.Length; i++) 
+            {
+                Destroy(levels[i]);    
+            }
+		}
     }
 
     public class UIMenuCommand {
@@ -217,4 +264,65 @@ namespace TimeWalk.Platform
         public HandleCommand commandCallback;
 
     }
+
+	//<summary>Represents range of float values<summary>
+	public class Range
+	{
+		public Range(float min, float max)
+		{
+			this.min = min;
+			this.max = max;
+		}
+
+        private float min;
+        private float max;
+
+        public float Min 
+        { 
+            get
+            {
+                return min;    
+            } 
+        }
+
+		public float Max
+		{
+			get
+			{
+				return max;
+			}
+		}
+
+        public float Delta()
+        {
+            return this.max - this.min;
+        }
+
+		//<summary>Translates value from Range to target Range</summary>
+		//<param name=x>Value from the current Range to translate</param>
+		//<param name=targetRange>The range to which x should be translated</param>
+		public float Translate(float x, Range targetRange)
+		{
+            if (this.Delta() <= 0f)
+			{
+				throw new ArgumentException(String.Format("current range does not have a positive delta"));
+			}
+
+            if (targetRange.Delta() <= 0f)
+            {
+				throw new ArgumentException(String.Format("target does not have a positive delta"));
+            }
+
+			if (x > max || x < min)
+			{
+                throw new ArgumentException(String.Format("x ({0}) is out of current range", x));
+			}
+
+            float ratio = targetRange.Delta() / Delta();
+            float converted = ratio * (max - x);
+            float translated = targetRange.max - converted;
+            // Debug.Log(String.Format("{0} in range ({4},{5}) translated to range ({1},{2}) is {3}", x, targetRange.min, targetRange.max, translated, min, max));
+            return translated;
+		}
+	}
 }
