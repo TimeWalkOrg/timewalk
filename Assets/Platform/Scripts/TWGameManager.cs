@@ -50,6 +50,17 @@ namespace TimeWalk.Platform {
                     timeWalkLocationInfo != null);
         }
 
+        public TWLevel GetLevelByYear(int year)
+        {
+            TWLevel level = null;
+            timeWalkLevels.ForEach(delegate (TWLevel l)
+            {
+                if(l.year == year) {
+                    level = l;
+                }
+            });
+            return level;
+        }
         
         public void OnLocationInfoChanged(TWLocationInfo locationInfo)
         {
@@ -79,16 +90,35 @@ namespace TimeWalk.Platform {
 			SetCurrentLevel();
         }
 
-		public void OnTimeWalkLevelChanged(TWLevel current)
+        public void OnTimeWalkLevelChanged(TWLevel newLevel)
 		{
-            if (current == null) return;
+            if (newLevel == null) return;
 
 			if (TWLevelChanged != null)
 			{
 				levelStartTime = DateTime.Now;
-				currentLevel = current;
+				currentLevel = newLevel;
 				TWLevelChanged();
 			}
+		}
+
+		public void OnTimeWalkLevelChanged()
+		{
+            int newLevelIdx = -1;
+            for (int i = 0; i < timeWalkLevels.Count; i++)
+            {
+                if(timeWalkLevels[i].year == currentLevel.year)
+                {
+                    newLevelIdx = (i == 0) ? 
+                        timeWalkLevels.Count - 1 : i - 1;
+                    break;
+                }
+            }
+
+            if (newLevelIdx > -1)
+            {
+                OnTimeWalkLevelChanged(timeWalkLevels[newLevelIdx]);
+            }
 		}
 
 		void Awake()

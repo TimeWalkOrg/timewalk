@@ -70,6 +70,10 @@ namespace TimeWalk.Platform
                 //    thisCommand.commandCallback(); 
                 //});
             });
+
+            // TODO Snap slider to levels
+            // Disable slider for now
+            slider.GetComponent<Slider>().enabled = false;
         }
 
         void Start()
@@ -146,28 +150,17 @@ namespace TimeWalk.Platform
                 item.GetComponent<Text>().text = l.year.ToString();
                 item.name = "LevelTextItem" + l.year.ToString();
 
+                // TODO Listen for button clicks
+
                 RectTransform itemRect = item.GetComponent<RectTransform>();
 
                 Vector3 pos = itemRect.position;
 
-                float maxYAvailable = slidePixelRange.Max;
-
-				// TODO Place item in it's normalized location, or if that is too 
-				// high then just below the last item.
-
-				//if (lastItemRectTransform != null)
-				//{
-				//	// Don't let the new item be placed above (or overlapping with) last item
-				//	maxYAvailable = lastItemRectTransform.position.y -
-				//				   lastItemRectTransform.rect.height;
-				//}
-
                 // Convert current year to corresponding pixel in y range
                 float yearInPixels = levelYearRange.Translate(l.year, slidePixelRange);
 
-                // 
                 // Place level on slide as close as possible to year in pixels
-                pos.y = Math.Min(maxYAvailable, yearInPixels);
+                pos.y = yearInPixels;
 
                 itemRect.position = pos;
 
@@ -199,13 +192,14 @@ namespace TimeWalk.Platform
         // Slider handler
         private void ChangeYear(int year)
         {
-            // TODO
+            TWLevel newLevel = TWGameManager.instance.GetLevelByYear(year);
+            TWGameManager.instance.OnTimeWalkLevelChanged(newLevel);
         }
 
         // Menu
         private void ChangeYear()
-        {
-            // TODO
+        {   
+            TWGameManager.instance.OnTimeWalkLevelChanged();
         }
 
         private void ToggleNightDay()
