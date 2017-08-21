@@ -23,6 +23,7 @@ namespace TimeWalk.Platform {
         private List<TWLevel> timeWalkLevels = null;
         private TWLevel currentLevel = null;
         private float currentTimeHours = 0.0f;
+        private Boolean isDayTime = true;
 
 
 		public List<TWLevel> TimeWalkLevels
@@ -136,9 +137,18 @@ namespace TimeWalk.Platform {
             }
 		}
 
-        public void OnTimeWalkNightDayChanged()
+        public void OnNightDayToggled()
         {
-            
+            // day == 6am-8pm
+            if (isDayTime) {
+                // Switch to night (8pm)
+                currentTimeHours = 20f + (currentTimeHours % 1);
+            }
+            else
+            {
+                // Switch to day (10am)
+				currentTimeHours = 10f + (currentTimeHours % 1);
+            }
         }
 
         public void OnRestart()
@@ -179,6 +189,15 @@ namespace TimeWalk.Platform {
             if (currentTimeHours > 24.0f)
             {
                 currentTimeHours %= 24.0f;
+            }
+
+            if(currentTimeHours >= 6f && currentTimeHours < 20f)
+            {
+                isDayTime = true;
+            } 
+            else
+            {
+                isDayTime = false;
             }
         }
 

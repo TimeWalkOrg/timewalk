@@ -218,7 +218,7 @@ namespace TimeWalk.Platform
 
         private void ToggleNightDay()
         {
-            TWGameManager.instance.OnTimeWalkNightDayChanged();
+            TWGameManager.instance.OnNightDayToggled();
         }
 
         private void ToggleColor()
