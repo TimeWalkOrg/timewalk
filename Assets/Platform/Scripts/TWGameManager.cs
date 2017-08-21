@@ -5,6 +5,7 @@ using UnityEngine;
 namespace TimeWalk.Platform {
     using System;
     using UnityEngine.UI;
+    using UnityEngine.SceneManagement;
 
     public class TWGameManager : MonoBehaviour
     {
@@ -13,11 +14,16 @@ namespace TimeWalk.Platform {
 		public event Action TWLocationInfoChanged;
 		public event Action TWLevelsChanged;
 		public event Action TWLevelChanged;
-        public DateTime levelStartTime;
-        
-        private TWLocationInfo timeWalkLocationInfo = null;
+
+		public static float startTimeHours = 12.0f; // noon
+		public static float timeSpeedUp = 12.0f; // 1 hour = 12 hours
+
+        private static float secondsToHours = 1f / 3600f;
+		private TWLocationInfo timeWalkLocationInfo = null;
         private List<TWLevel> timeWalkLevels = null;
         private TWLevel currentLevel = null;
+        private float currentTimeHours = 0.0f;
+
 
 		public List<TWLevel> TimeWalkLevels
 		{
@@ -34,6 +40,15 @@ namespace TimeWalk.Platform {
                 return currentLevel;
             }
         }
+
+        //<summary>Current time in hours</summary>
+		public float CurrentTimeHours
+		{
+			get
+			{
+				return currentTimeHours;
+			}
+		}
 
 		public TWLocationInfo TimeWalkLocationInfo
 		{
@@ -69,6 +84,8 @@ namespace TimeWalk.Platform {
             if(TWLocationInfoChanged != null)
             {
                 timeWalkLocationInfo = locationInfo;
+                startTimeHours = locationInfo.startTimeHours;
+                timeSpeedUp = locationInfo.timeSpeedUp;
                 TWLocationInfoChanged();
             }
         }
@@ -77,7 +94,6 @@ namespace TimeWalk.Platform {
         {
             if (levels == null) return;
 
-			levelStartTime = DateTime.Now;
 			timeWalkLevels = levels;
 
             timeWalkLevels.Sort();
@@ -95,8 +111,7 @@ namespace TimeWalk.Platform {
             if (newLevel == null) return;
 
 			if (TWLevelChanged != null)
-			{
-				levelStartTime = DateTime.Now;
+            {
 				currentLevel = newLevel;
 				TWLevelChanged();
 			}
@@ -121,6 +136,23 @@ namespace TimeWalk.Platform {
             }
 		}
 
+        public void OnTimeWalkNightDayChanged()
+        {
+            
+        }
+
+        public void OnRestart()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+
+		public void OnQuit()
+		{
+			Application.Quit();
+		}
+
+
+
 		void Awake()
         {
             // Singleton
@@ -136,6 +168,18 @@ namespace TimeWalk.Platform {
 
             // Don't destroy this object when new scene is loaded 
             DontDestroyOnLoad(gameObject);
+
+            // Set start time from location info
+            currentTimeHours = startTimeHours;
+        }
+
+        void Update()
+        {
+            currentTimeHours += Time.deltaTime * timeSpeedUp * secondsToHours;
+            if (currentTimeHours > 24.0f)
+            {
+                currentTimeHours %= 24.0f;
+            }
         }
 
         private void SetCurrentLevel()
@@ -186,9 +230,10 @@ namespace TimeWalk.Platform {
         // Will need to rethink city and state for international locations
         public string city;
         public string state;
-        public Boolean isNight;
-        public Boolean isColor;
-        public DateTime startTime; // Time of day to start clock?
+        public Boolean isNight = false;
+        public Boolean isColor = true;
+        public float startTimeHours = TWGameManager.startTimeHours;
+        public float timeSpeedUp = TWGameManager.timeSpeedUp;
     }
 }
 

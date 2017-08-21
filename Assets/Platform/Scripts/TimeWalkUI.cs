@@ -19,8 +19,8 @@ namespace TimeWalk.Platform
         private GameObject slider;
         private GameObject track;
         private GameObject handle;
-        private GameObject menu;
-        private float lastClockUpdate;
+        private GameObject helpMenu;
+        private float lastClockUpdate = 0f;
         private Range levelYearRange; //x=min,y=max
         private Range slidePixelRange; //x=min,y=max
 
@@ -36,7 +36,7 @@ namespace TimeWalk.Platform
             dateText = GameObject.Find("Date").GetComponent<Text>();
             timeText = GameObject.Find("Time").GetComponent<Text>();
             helpHintText = GameObject.Find("HelpHint").GetComponent<Text>();
-            menu = GameObject.Find("Menu");
+            helpMenu = GameObject.Find("Menu");
             slider = GameObject.Find("Slider");
             track = GameObject.Find("Track");
             handle = GameObject.Find("Handle");
@@ -59,7 +59,7 @@ namespace TimeWalk.Platform
                 Debug.Log("processing " + command.description);
 
                 // Create menu item
-                Button item = Instantiate(commandMenuItemTextPrefab, menu.transform).GetComponent<Button>();
+                Button item = Instantiate(commandMenuItemTextPrefab, helpMenu.transform).GetComponent<Button>();
 
                 item.GetComponent<Text>().text = command.description + " (" + command.keyCode.ToString() + ")";
 
@@ -82,6 +82,7 @@ namespace TimeWalk.Platform
             if(TWGameManager.instance.DataReady())
             {
 				HandleLocationInfo();
+                UpdateTime();
 				HandleNewLevels();
 				HandleNewLevel();
 			}
@@ -95,11 +96,10 @@ namespace TimeWalk.Platform
         // Update is called once per frame
         void Update()
         {
-            // Update time if it has been greater than 60s
-            if (Time.timeSinceLevelLoad - lastClockUpdate > 60f)
+            // Update time every 1s
+            if (Time.timeSinceLevelLoad - lastClockUpdate > 1.0f)
             {
-                // TODO use static start time in location info
-                timeText.text = System.DateTime.Now.ToString("h:mm tt");
+                UpdateTime();
                 lastClockUpdate = Time.timeSinceLevelLoad;
             }
 
@@ -114,15 +114,27 @@ namespace TimeWalk.Platform
             });
         }
 
+        private void UpdateTime()
+        {
+            if (timeText == null) return;
+            TimeSpan t = TimeSpan.FromHours(TWGameManager.instance.CurrentTimeHours);
+            timeText.text = String.Format("{0}:{1}" + (t.Hours >= 12 ? "pm" : "am"),
+                                          t.Hours > 12 ? t.Hours % 12 : t.Hours,
+                                          t.Minutes.ToString("D2"));
+        }
+
         private void HandleLocationInfo()
         {
+            if (locationText == null) return;
             TWLocationInfo locationInfo = TWGameManager.instance.TimeWalkLocationInfo;
             TWLevel currentLevel = TWGameManager.instance.CurrentLevel;
             locationText.text = locationInfo.city + ", " + locationInfo.state;
+            UpdateTime();
         }
 
         private void HandleNewLevels()
         {
+            if (levelTextPrefab == null || slider == null) return;
             List<TWLevel> levels = TWGameManager.instance.TimeWalkLevels;
             RectTransform lastItemRectTransform = null;
 
@@ -171,6 +183,8 @@ namespace TimeWalk.Platform
 
         private void HandleNewLevel()
         {
+            if (dateText == null || fullLevelText == null ||
+                slider == null || handle == null) return;
             TWLevel currentLevel = TWGameManager.instance.CurrentLevel;
 			
             DateTime now = System.DateTime.Now;
@@ -204,12 +218,14 @@ namespace TimeWalk.Platform
 
         private void ToggleNightDay()
         {
-            // TODO
+            TWGameManager.instance.OnTimeWalkNightDayChanged();
         }
 
         private void ToggleColor()
         {
-            // TODO
+			// TODO Need the latest Colorful FX: 
+            // https://www.assetstore.unity3d.com/en/#!/content/44845
+
         }
 
         private void ToggleComments()
@@ -219,17 +235,17 @@ namespace TimeWalk.Platform
 
         private void ToggleHelp()
         {
-            // TODO
+            helpMenu.SetActive(!helpMenu.activeSelf);
         }
 
         private void Restart()
         {
-            // TODO
+            TWGameManager.instance.OnRestart();
         }
 
         private void Quit()
         {
-            // TODO
+            TWGameManager.instance.OnQuit();
         }
 
 		private void ClearLevels()
