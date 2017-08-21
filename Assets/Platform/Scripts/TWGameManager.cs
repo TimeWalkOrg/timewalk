@@ -14,6 +14,7 @@ namespace TimeWalk.Platform {
 		public event Action TWLocationInfoChanged;
 		public event Action TWLevelsChanged;
 		public event Action TWLevelChanged;
+        public event Action TWNightDayChanged;
 
 		public static float startTimeHours = 12.0f; // noon
 		public static float timeSpeedUp = 12.0f; // 1 hour = 12 hours
@@ -50,6 +51,14 @@ namespace TimeWalk.Platform {
 				return currentTimeHours;
 			}
 		}
+
+        public Boolean IsDayTime
+        {
+            get
+            {
+                return isDayTime;    
+            }
+        }
 
 		public TWLocationInfo TimeWalkLocationInfo
 		{
@@ -191,6 +200,8 @@ namespace TimeWalk.Platform {
                 currentTimeHours %= 24.0f;
             }
 
+            Boolean oldIsDayTime = isDayTime;
+
             if(currentTimeHours >= 6f && currentTimeHours < 20f)
             {
                 isDayTime = true;
@@ -198,6 +209,10 @@ namespace TimeWalk.Platform {
             else
             {
                 isDayTime = false;
+            }
+
+            if(oldIsDayTime != isDayTime) {
+                TWNightDayChanged();
             }
         }
 
