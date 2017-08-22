@@ -16,6 +16,7 @@ namespace TimeWalk.Platform
         private Text timeText;
         private Text helpHintText;
         private Text fullLevelText;
+        private GameObject helpHint;
         private GameObject slider;
         private GameObject track;
         private GameObject handle;
@@ -23,6 +24,11 @@ namespace TimeWalk.Platform
         private float lastClockUpdate = 0f;
         private Range levelYearRange; //x=min,y=max
         private Range slidePixelRange; //x=min,y=max
+        private float showHelpTime;
+        private float showHelpDuration = 10f;
+        private float levelLoadTime;
+        private float fullLevelTextDuration = 10f;
+
 
 
         // TODO Hide full help text after time period
@@ -35,7 +41,8 @@ namespace TimeWalk.Platform
             locationText = GameObject.Find("Location").GetComponent<Text>();
             dateText = GameObject.Find("Date").GetComponent<Text>();
             timeText = GameObject.Find("Time").GetComponent<Text>();
-            helpHintText = GameObject.Find("HelpHint").GetComponent<Text>();
+            helpHint = GameObject.Find("HelpHint");
+            helpHintText = helpHint.GetComponent<Text>();
             helpMenu = GameObject.Find("Menu");
             slider = GameObject.Find("Slider");
             track = GameObject.Find("Track");
@@ -78,6 +85,8 @@ namespace TimeWalk.Platform
 
         void Start()
         {
+            showHelpTime = levelLoadTime = Time.timeSinceLevelLoad;
+
             // Update UI (if ready)
             if(TWGameManager.instance.DataReady())
             {
@@ -91,6 +100,7 @@ namespace TimeWalk.Platform
             TWGameManager.instance.TWLocationInfoChanged += HandleLocationInfo;
             TWGameManager.instance.TWLevelsChanged += HandleNewLevels;
             TWGameManager.instance.TWLevelChanged += HandleNewLevel;
+
         }
 
         // Update is called once per frame
@@ -101,6 +111,20 @@ namespace TimeWalk.Platform
             {
                 UpdateTime();
                 lastClockUpdate = Time.timeSinceLevelLoad;
+            }
+
+            // Hide help after duration
+            if ((Time.timeSinceLevelLoad - showHelpTime) > showHelpDuration &&
+                    !TWGameManager.instance.IsPaused)
+            {
+                helpMenu.SetActive(false);
+                helpHint.SetActive(false);
+            }
+
+            // Truncate level text after duration
+            if ((Time.timeSinceLevelLoad - levelLoadTime) > fullLevelTextDuration)
+            {
+                TruncateLevelText();
             }
 
             // Invoke any commands from the user
@@ -201,7 +225,15 @@ namespace TimeWalk.Platform
 
             // Make sure slider handle is last sibling (for z order)
             handle.GetComponent<Transform>().SetAsLastSibling();
+
+            levelLoadTime = Time.timeSinceLevelLoad;
 		}
+
+        private void TruncateLevelText()
+        {
+            TWLevel currentLevel = TWGameManager.instance.CurrentLevel;
+            fullLevelText.text = currentLevel.year.ToString();
+        }
                          
         // Slider handler
         private void ChangeYear(int year)
@@ -235,7 +267,16 @@ namespace TimeWalk.Platform
 
         private void ToggleHelp()
         {
-            helpMenu.SetActive(!helpMenu.activeSelf);
+            if(!helpMenu.activeSelf) {
+                showHelpTime = Time.timeSinceLevelLoad;
+                TWGameManager.instance.OnPause(true);
+                helpMenu.SetActive(true);
+            } 
+            else 
+            {
+                TWGameManager.instance.OnPause(false);
+                helpMenu.SetActive(false);
+            }
         }
 
         private void Restart()

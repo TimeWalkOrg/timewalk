@@ -25,6 +25,7 @@ namespace TimeWalk.Platform {
         private TWLevel currentLevel = null;
         private float currentTimeHours = 0.0f;
         private Boolean isDayTime = true;
+        private Boolean isPaused = false;
 
 
 		public List<TWLevel> TimeWalkLevels
@@ -57,6 +58,14 @@ namespace TimeWalk.Platform {
             get
             {
                 return isDayTime;    
+            }
+        }
+
+        public Boolean IsPaused
+        {
+            get
+            {
+                return isPaused;
             }
         }
 
@@ -170,6 +179,11 @@ namespace TimeWalk.Platform {
 			Application.Quit();
 		}
 
+        public void OnPause(Boolean pause)
+        {
+            Time.timeScale = pause ? 0 : 1;
+            isPaused = pause;
+        }
 
 
 		void Awake()
