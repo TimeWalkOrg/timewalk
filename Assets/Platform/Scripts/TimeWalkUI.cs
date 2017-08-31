@@ -63,7 +63,6 @@ namespace TimeWalk.Platform
             commands.ForEach(delegate (UIMenuCommand c)
             {
                 UIMenuCommand command = c;
-                Debug.Log("processing " + command.description);
 
                 // Create menu item
                 Button item = Instantiate(commandMenuItemTextPrefab, helpMenu.transform).GetComponent<Button>();
@@ -83,14 +82,6 @@ namespace TimeWalk.Platform
             slider.GetComponent<Slider>().enabled = false;
         }
 
-        private void OnEnable()
-        {
-			// Subscribe to changes
-			TWGameManager.instance.TWLocationInfoChanged += HandleLocationInfo;
-			TWGameManager.instance.TWLevelsChanged += HandleNewLevels;
-			TWGameManager.instance.TWLevelChanged += HandleNewLevel;
-        }
-
         private void OnDisable()
         {
 			// Unsubscribe to changes
@@ -101,6 +92,11 @@ namespace TimeWalk.Platform
 
         void Start()
         {
+			// Subscribe to changes
+			TWGameManager.instance.TWLocationInfoChanged += HandleLocationInfo;
+			TWGameManager.instance.TWLevelsChanged += HandleNewLevels;
+			TWGameManager.instance.TWLevelChanged += HandleNewLevel;
+
             showHelpTime = levelLoadTime = Time.timeSinceLevelLoad;
         }
 

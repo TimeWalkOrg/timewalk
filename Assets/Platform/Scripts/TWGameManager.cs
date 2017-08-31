@@ -15,6 +15,7 @@ namespace TimeWalk.Platform {
 		public event Action TWLevelsChanged;
 		public event Action TWLevelChanged;
         public event Action TWNightDayChanged;
+        public event Action TWPauseToggled;
 
 		public static float startTimeHours = 12.0f; // noon
 		public static float timeSpeedUp = 12.0f; // 1 hour = 12 hours
@@ -182,6 +183,10 @@ namespace TimeWalk.Platform {
         {
             Time.timeScale = pause ? 0 : 1;
             isPaused = pause;
+            if(TWPauseToggled != null)
+            {
+                TWPauseToggled();
+            }
         }
 
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
