@@ -22,6 +22,7 @@ namespace TimeWalk.Platform {
         private static float secondsToHours = 1f / 3600f;
 		private TWLocationInfo timeWalkLocationInfo = null;
         private List<TWLevel> timeWalkLevels = null;
+        private TWLevel previousLevel = null;
         private TWLevel currentLevel = null;
         private float currentTimeHours = 0.0f;
         private Boolean isDayTime = true;
@@ -129,15 +130,13 @@ namespace TimeWalk.Platform {
 		{
             if (newLevel == null) return;
 
-			if (TWLevelChanged != null)
-            {
-				currentLevel = newLevel;
-				TWLevelChanged();
-			}
+            SetCurrentLevel(newLevel);
 		}
 
 		public void OnTimeWalkLevelChanged()
 		{
+            if (timeWalkLevels == null) return;
+
             int newLevelIdx = -1;
             for (int i = 0; i < timeWalkLevels.Count; i++)
             {
@@ -159,12 +158,12 @@ namespace TimeWalk.Platform {
         {
             // day == 6am-8pm
             if (isDayTime) {
-                // Switch to night (8pm)
+                // Switch to night (8:xx pm)
                 currentTimeHours = 20f + (currentTimeHours % 1);
             }
             else
             {
-                // Switch to day (10am)
+                // Switch to day (10:xx am)
 				currentTimeHours = 10f + (currentTimeHours % 1);
             }
         }
@@ -185,9 +184,23 @@ namespace TimeWalk.Platform {
             isPaused = pause;
         }
 
+        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if(previousLevel != null && previousLevel.levelSceneName == scene.name) {
+                // Unload finished
+                previousLevel = null;
+            }
+
+            if(currentLevel != null && currentLevel.levelSceneName == scene.name) {
+                // New scene ready
+            }
+        }
+
 
 		void Awake()
         {
+            // TODO Probably don't need singleton if we have a master scene
+
             // Singleton
             if (instance == null)
             {
@@ -230,27 +243,65 @@ namespace TimeWalk.Platform {
             }
         }
 
-        private void SetCurrentLevel()
+        private void OnEnable()
         {
-			// Set current if null
-			if (currentLevel == null)
-			{
-				timeWalkLevels.ForEach(delegate (TWLevel l)
-				{
-					if (l.isDefault)
-					{
-						currentLevel = l;
-					}
-				});
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
 
-				// Just pick first level if no defaults
-				if (currentLevel == null)
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+
+        private void SetCurrentLevel(TWLevel newLevel)
+        {
+			TWLevel originalLevel = currentLevel;
+            if (originalLevel != newLevel)
+			{
+                currentLevel = newLevel;
+                previousLevel = originalLevel;
+
+				Debug.Log(String.Format("Level change from {0} to {1}",
+									previousLevel != null ? previousLevel.levelSceneName : "null",
+									currentLevel != null ? currentLevel.levelSceneName : "null"));
+
+				// Unload old scene
+				if (previousLevel != null)
 				{
-					currentLevel = timeWalkLevels[0];
+					SceneManager.UnloadSceneAsync(previousLevel.levelSceneName);
 				}
 
-                TWLevelChanged();
+				// Load new scene
+				SceneManager.LoadSceneAsync(currentLevel.levelSceneName, LoadSceneMode.Additive);
+
+				if (TWLevelChanged != null)
+				{
+					TWLevelChanged();
+				}
 			}
+        }
+
+        private void SetCurrentLevel()
+        {
+            if (timeWalkLevels == null) return;
+
+            TWLevel newLevel = null;
+
+            timeWalkLevels.ForEach(delegate (TWLevel l)
+			{
+				if (l.isDefault)
+				{
+					newLevel = l;
+				}
+			});
+
+			// Just pick first level if no defaults
+			if (newLevel == null)
+			{
+				newLevel = timeWalkLevels[0];
+			}
+
+            SetCurrentLevel(newLevel);
         }
     }
 
@@ -260,6 +311,7 @@ namespace TimeWalk.Platform {
         public int year;
         public string label;
         public Boolean isDefault;
+		public string levelSceneName;
 
         public int CompareTo(object obj)
         {
@@ -282,6 +334,7 @@ namespace TimeWalk.Platform {
         public Boolean isColor = true;
         public float startTimeHours = TWGameManager.startTimeHours;
         public float timeSpeedUp = TWGameManager.timeSpeedUp;
+
     }
 }
 

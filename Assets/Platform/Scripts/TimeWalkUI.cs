@@ -83,24 +83,25 @@ namespace TimeWalk.Platform
             slider.GetComponent<Slider>().enabled = false;
         }
 
+        private void OnEnable()
+        {
+			// Subscribe to changes
+			TWGameManager.instance.TWLocationInfoChanged += HandleLocationInfo;
+			TWGameManager.instance.TWLevelsChanged += HandleNewLevels;
+			TWGameManager.instance.TWLevelChanged += HandleNewLevel;
+        }
+
+        private void OnDisable()
+        {
+			// Unsubscribe to changes
+			TWGameManager.instance.TWLocationInfoChanged -= HandleLocationInfo;
+			TWGameManager.instance.TWLevelsChanged -= HandleNewLevels;
+			TWGameManager.instance.TWLevelChanged -= HandleNewLevel;
+        }
+
         void Start()
         {
             showHelpTime = levelLoadTime = Time.timeSinceLevelLoad;
-
-            // Update UI (if ready)
-            if(TWGameManager.instance.DataReady())
-            {
-				HandleLocationInfo();
-                UpdateTime();
-				HandleNewLevels();
-				HandleNewLevel();
-			}
-
-            // Subscribe to changes
-            TWGameManager.instance.TWLocationInfoChanged += HandleLocationInfo;
-            TWGameManager.instance.TWLevelsChanged += HandleNewLevels;
-            TWGameManager.instance.TWLevelChanged += HandleNewLevel;
-
         }
 
         // Update is called once per frame
