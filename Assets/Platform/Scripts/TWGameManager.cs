@@ -24,7 +24,9 @@ namespace TimeWalk.Platform {
 		private TWLocationInfo timeWalkLocationInfo = null;
         private List<TWLevel> timeWalkLevels = null;
         private TWLevel previousLevel = null;
+        private Boolean previousLevelUnloading = false;
         private TWLevel currentLevel = null;
+        private Boolean currentLevelLoading = false;
         private float currentTimeHours = 0.0f;
         private Boolean isDayTime = true;
         private Boolean isPaused = false;
@@ -125,6 +127,8 @@ namespace TimeWalk.Platform {
 			}
 
 			SetCurrentLevel();
+
+            ResetNonCurrentLevels();
         }
 
         public void OnTimeWalkLevelChanged(TWLevel newLevel)
@@ -191,14 +195,12 @@ namespace TimeWalk.Platform {
 
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if(previousLevel != null && previousLevel.levelSceneName == scene.name) {
-                // Unload finished
-                previousLevel = null;
-            }
+            ProcessLevelChange();
+        }
 
-            if(currentLevel != null && currentLevel.levelSceneName == scene.name) {
-                // New scene ready
-            }
+        void OnSceneUnLoaded(Scene scene)
+        {
+            ProcessLevelChange();
         }
 
 
@@ -250,40 +252,27 @@ namespace TimeWalk.Platform {
 
         private void OnEnable()
         {
-            SceneManager.sceneLoaded += OnSceneLoaded;
+			SceneManager.sceneLoaded += OnSceneLoaded;
+			SceneManager.sceneUnloaded += OnSceneUnLoaded;
         }
 
         private void OnDisable()
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
+            SceneManager.sceneUnloaded -= OnSceneUnLoaded;
         }
 
         private void SetCurrentLevel(TWLevel newLevel)
         {
-			TWLevel originalLevel = currentLevel;
-            if (originalLevel != newLevel)
-			{
-                currentLevel = newLevel;
-                previousLevel = originalLevel;
+            if (currentLevel == newLevel) return;
 
-				Debug.Log(String.Format("Level change from {0} to {1}",
-									previousLevel != null ? previousLevel.levelSceneName : "null",
-									currentLevel != null ? currentLevel.levelSceneName : "null"));
+            previousLevel = currentLevel;
+            currentLevel = newLevel;
 
-				// Unload old scene
-				if (previousLevel != null)
-				{
-					SceneManager.UnloadSceneAsync(previousLevel.levelSceneName);
-				}
-
-				// Load new scene
-				SceneManager.LoadSceneAsync(currentLevel.levelSceneName, LoadSceneMode.Additive);
-
-				if (TWLevelChanged != null)
-				{
-					TWLevelChanged();
-				}
-			}
+			Debug.Log(String.Format("Level change from {0} to {1}",
+								previousLevel != null ? previousLevel.levelSceneName : "null",
+								currentLevel != null ? currentLevel.levelSceneName : "null"));
+            ProcessLevelChange();
         }
 
         private void SetCurrentLevel()
@@ -308,7 +297,82 @@ namespace TimeWalk.Platform {
 
             SetCurrentLevel(newLevel);
         }
+
+        private void ProcessLevelChange()
+        {
+            // If current exists and isn't already loading or loaded, load it
+            if(currentLevel != null)
+            {
+                Scene currentLevelScene = SceneManager.GetSceneByName(currentLevel.levelSceneName);
+                if(currentLevelLoading) 
+                {
+                    // Make sure it is valid
+                    if(currentLevelScene.IsValid()) {
+                        if(currentLevelScene.isLoaded) {
+                            
+                            currentLevelLoading = false;
+							
+                            // New scene ready
+							if (TWLevelChanged != null)
+							{
+								TWLevelChanged();
+							}
+                        } 
+                    } 
+                    else 
+                    {
+                        Debug.LogError("Unable to load " + currentLevelScene.name);    
+                    }
+                }
+                else
+                if(!currentLevelScene.isLoaded)
+                {
+					// Load new scene
+					SceneManager.LoadSceneAsync(currentLevel.levelSceneName, LoadSceneMode.Additive);
+                    currentLevelLoading = true;
+                }
+            }
+
+			// If previous exists and is loaded, unload it
+			if (previousLevel != null)
+			{
+                Scene previousLevelScene = SceneManager.GetSceneByName(previousLevel.levelSceneName);
+				if (previousLevelUnloading)
+				{
+                    if(!previousLevelScene.isLoaded)
+					{
+                        // Old scene unloaded
+                        previousLevelUnloading = false;
+						previousLevel = null;
+					}
+				}
+				else
+				{
+					SceneManager.UnloadSceneAsync(previousLevel.levelSceneName);
+                    previousLevelUnloading = true;
+				}
+			}
+        }
+
+		private void ResetNonCurrentLevels()
+		{
+			if (timeWalkLevels == null) return;
+
+			timeWalkLevels.ForEach(delegate (TWLevel l)
+			{
+                if(l.levelSceneName != currentLevel.levelSceneName)
+                {
+                    Scene levelScene = SceneManager.GetSceneByName(l.levelSceneName);
+                    if (levelScene.isLoaded)
+                    {
+                        SceneManager.UnloadSceneAsync(levelScene.name);
+                    }
+                }
+			});
+		}
     }
+
+
 
     [System.Serializable]
     public class TWLevel : IComparable

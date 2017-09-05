@@ -98,6 +98,11 @@ namespace TimeWalk.Platform
 			TWGameManager.instance.TWLevelChanged += HandleNewLevel;
 
             showHelpTime = levelLoadTime = Time.timeSinceLevelLoad;
+
+            // Try to load what we can
+            HandleLocationInfo();
+            HandleNewLevels();
+            HandleNewLevel();
         }
 
         // Update is called once per frame
@@ -146,17 +151,18 @@ namespace TimeWalk.Platform
 
         private void HandleLocationInfo()
         {
-            if (locationText == null) return;
             TWLocationInfo locationInfo = TWGameManager.instance.TimeWalkLocationInfo;
+            if (locationText == null || locationInfo == null) return;
+			
             TWLevel currentLevel = TWGameManager.instance.CurrentLevel;
-            locationText.text = locationInfo.city + ", " + locationInfo.state;
-            UpdateTime();
+			locationText.text = locationInfo.city + ", " + locationInfo.state;
+			UpdateTime();
         }
 
         private void HandleNewLevels()
         {
-            if (levelTextPrefab == null || slider == null) return;
             List<TWLevel> levels = TWGameManager.instance.TimeWalkLevels;
+            if (levels == null || levelTextPrefab == null || slider == null) return;
             RectTransform lastItemRectTransform = null;
 
             Slider sliderComp = slider.GetComponent<Slider>();
@@ -204,10 +210,11 @@ namespace TimeWalk.Platform
 
         private void HandleNewLevel()
         {
-            if (dateText == null || fullLevelText == null ||
-                slider == null || handle == null) return;
             TWLevel currentLevel = TWGameManager.instance.CurrentLevel;
-			
+            if (currentLevel == null || 
+                dateText == null || fullLevelText == null ||
+                slider == null || handle == null) return;
+            
             DateTime now = System.DateTime.Now;
 			
             // Set Date
