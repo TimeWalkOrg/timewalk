@@ -21,11 +21,11 @@ public class ExternalPackageManager
     private static Action<Boolean> DownloadsComplete;
     private delegate void HandlePackageComplete(Boolean error);
 
-    [MenuItem("Assets/External Package Manager/Export All", false, 1)]
+    [MenuItem("Assets/External Package Manager/Export All")]
     static void ExportAll()
     {
         Debug.Log("EPM: ExportAll");
-        ParsePackagesJson();
+        parsePackagesJson();
         try
         {
             // Make sure build folder exists at project root (inferred from assets folder)
@@ -78,40 +78,15 @@ public class ExternalPackageManager
 
     }
 
-    [MenuItem("Assets/External Package Manager/Import All", false, 2)]
+    [MenuItem("Assets/External Package Manager/Import All")]
     static void ImportAll()
     {
         // Download and import all packages from package.json
         Debug.Log("EPM: ImportAll");
-        ParsePackagesJson();
+        parsePackagesJson();
 
         downloadQueue = new Queue<string>();
-        StartPackageImport();
-    }
 
-    [MenuItem("Assets/External Package Manager/Export Specific Package", false, 11)]
-    static void ExportSpecificPackage()
-    {
-        // TODO
-    }
-
-    [MenuItem("Assets/External Package Manager/Import Specific Package", false, 12)]
-    static void ImportSpecificPackage()
-    {
-        Debug.Log("EPM: ImportSpecificPackage");
-        ParsePackagesJson();
-
-        // XXX This doesn't work... we need an actual editor window
-        int index = EditorGUILayout.Popup(0, packagesJson.dependencies.ToArray());
-
-        downloadQueue = new Queue<String>();
-        downloadQueue.Enqueue(packagesJson.dependencies[index]);
-
-        StartPackageImport();
-    }
-
-    private static void StartPackageImport()
-    {
         // Init queue
         packagesJson.dependencies.ForEach(downloadQueue.Enqueue);
         totalDownloads = downloadQueue.Count;
@@ -183,6 +158,7 @@ public class ExternalPackageManager
                 // Only update if this is the first update or we have made progress
                 if (lastProgress < 0.01f || (www.progress - lastProgress > 0.01f))
                 {
+                    lastProgress = www.progress;
                     if (EditorUtility.DisplayCancelableProgressBar("External Package Manager", dialogMessage, www.progress))
                     {
                         Debug.Log("EPM: ImportAll cancelled by user.");
@@ -192,8 +168,6 @@ public class ExternalPackageManager
                         EditorApplication.update -= checkDownload;
                         callback(true);
                     }
-
-                    lastProgress = www.progress;
                 }
             }
             else
@@ -225,7 +199,7 @@ public class ExternalPackageManager
         EditorApplication.update += checkDownload;
     }
 
-    private static void ParsePackagesJson()
+    private static void parsePackagesJson()
     {
         string packagesPath = Path.Combine(Application.dataPath, "packages.json");
 
@@ -255,7 +229,7 @@ public class ExternalPackageManager
     {
         public string version;
         public string buildFolder = Path.Combine("Builds", "Packages"); // relative to project root
-        public List<String> exports = new List<String>();
-        public List<String> dependencies = new List<String>();
+        public List<string> exports = new List<string>();
+        public List<string> dependencies = new List<string>();
     }
 }

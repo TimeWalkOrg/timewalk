@@ -3,7 +3,8 @@
   "exports": [
     "Standard Assets",
     "SampleScenes",
-    "Fonts"
+    "Fonts",
+    "../Platform"
   ],
   "dependencies": [
     "https://www.dropbox.com/s/4rfzhr09d3jee4d/Standard%20Assets-v0.1.unitypackage?dl=1",
