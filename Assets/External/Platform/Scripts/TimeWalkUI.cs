@@ -162,7 +162,18 @@ namespace TimeWalk.Platform
         private void HandleNewLevels()
         {
             List<TWLevel> levels = TWGameManager.instance.TimeWalkLevels;
-            if (levels == null || levelTextPrefab == null || slider == null) return;
+            if (levels == null || levels.Count <= 1 || levelTextPrefab == null || slider == null) return;
+
+            if(levels.Count >= 1)
+            {
+                slider.gameObject.SetActive(true);
+            }
+            else
+            {
+                slider.gameObject.SetActive(false);
+            }
+            
+
             RectTransform lastItemRectTransform = null;
 
             Slider sliderComp = slider.GetComponent<Slider>();

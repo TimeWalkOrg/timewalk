@@ -104,11 +104,12 @@ namespace TimeWalk.Platform {
         {
             if (locationInfo == null) return;
 
-            if(TWLocationInfoChanged != null)
-            {
-                timeWalkLocationInfo = locationInfo;
-                startTimeHours = locationInfo.startTimeHours;
-                timeSpeedUp = locationInfo.timeSpeedUp;
+            timeWalkLocationInfo = locationInfo;
+            startTimeHours = locationInfo.startTimeHours;
+            timeSpeedUp = locationInfo.timeSpeedUp;
+
+            if (TWLocationInfoChanged != null)
+            {   
                 TWLocationInfoChanged();
             }
         }
