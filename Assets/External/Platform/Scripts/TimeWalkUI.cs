@@ -133,7 +133,8 @@ namespace TimeWalk.Platform
             commands.ForEach(delegate (UIMenuCommand c)
             {
                 UIMenuCommand command = c;
-                if(Input.GetKeyDown(command.keyCode)){
+                if (Input.GetKeyDown(command.keyCode))
+                {
                     Debug.Log("Command: " + command.keyCode.ToString() + ", " + command.description);
                     command.commandCallback();
                 }
@@ -153,26 +154,24 @@ namespace TimeWalk.Platform
         {
             TWLocationInfo locationInfo = TWGameManager.instance.TimeWalkLocationInfo;
             if (locationText == null || locationInfo == null) return;
-			
+
             TWLevel currentLevel = TWGameManager.instance.CurrentLevel;
-			locationText.text = locationInfo.city + ", " + locationInfo.state;
-			UpdateTime();
+            locationText.text = locationInfo.city + ", " + locationInfo.state;
+            UpdateTime();
         }
 
         private void HandleNewLevels()
         {
             List<TWLevel> levels = TWGameManager.instance.TimeWalkLevels;
-            if (levels == null || levels.Count <= 1 || levelTextPrefab == null || slider == null) return;
+            if (levels == null || levelTextPrefab == null || slider == null) return;
 
-            if(levels.Count >= 1)
-            {
-                slider.gameObject.SetActive(true);
-            }
-            else
+            if (levels.Count <= 1)
             {
                 slider.gameObject.SetActive(false);
+                return;
             }
-            
+
+            slider.gameObject.SetActive(true);
 
             RectTransform lastItemRectTransform = null;
 
@@ -282,12 +281,13 @@ namespace TimeWalk.Platform
 
         private void ToggleHelp()
         {
-            if(!helpMenu.activeSelf) {
+            if (!helpMenu.activeSelf)
+            {
                 showHelpTime = Time.timeSinceLevelLoad;
                 TWGameManager.instance.OnPause(true);
                 helpMenu.SetActive(true);
-            } 
-            else 
+            }
+            else
             {
                 TWGameManager.instance.OnPause(false);
                 helpMenu.SetActive(false);
