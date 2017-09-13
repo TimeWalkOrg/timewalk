@@ -39,6 +39,6 @@ sysinfo.txt
 /Assets/External.meta*
 /Assets/External/*
 # Except this one
-!/Assets/External/Platform
+!/Assets/External/TimeWalk
 
 .DS_Store
