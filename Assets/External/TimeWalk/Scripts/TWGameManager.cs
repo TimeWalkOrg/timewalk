@@ -246,8 +246,12 @@ namespace TimeWalk.Platform {
                 isDayTime = false;
             }
 
-            if(oldIsDayTime != isDayTime) {
-                TWNightDayChanged();
+            if(oldIsDayTime != isDayTime) 
+            {
+                if(TWNightDayChanged != null)
+                {
+                    TWNightDayChanged();    
+                }  
             }
         }
 
