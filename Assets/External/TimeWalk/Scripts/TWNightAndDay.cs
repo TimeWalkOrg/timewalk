@@ -19,7 +19,6 @@ namespace TimeWalk.Platform
 		public float minAmbient = 0f;
 		public float minAmbientPoint = -0.2f;
 
-
 		public Gradient nightDayFogColor;
 		public AnimationCurve fogDensityCurve;
 		public float fogScale = 1f;
@@ -29,6 +28,10 @@ namespace TimeWalk.Platform
 
 		public Vector3 dayRotateSpeed;
 		public Vector3 nightRotateSpeed;
+
+        public float forwardDownDot;
+        public Vector3 forward;
+        public Vector3 down;
 
 		float skySpeed = 1;
 
@@ -40,23 +43,23 @@ namespace TimeWalk.Platform
         {
             skyMat = RenderSettings.skybox;
             mainLight = GetComponent<Light>();
-
-            //UpdateNightAndDay();
-            //TWGameManager.instance.TWNightDayChanged += UpdateNightAndDay;
         }
 
         // Update is called once per frame
         void Update()
         {
+            forward = mainLight.transform.forward;
+            down = Vector3.down;
+            forwardDownDot = Vector3.Dot(mainLight.transform.forward, Vector3.down);
 			// Update sun intensity
 			float tRange = 1 - minPoint;
-			float dot = Mathf.Clamp01((Vector3.Dot(mainLight.transform.forward, Vector3.down) - minPoint) / tRange);
+            float dot = Mathf.Clamp01((forwardDownDot - minPoint) / tRange);
 			float i = ((maxIntensity - minIntensity) * dot) + minIntensity;
 			mainLight.intensity = i;
 
 			// Update ambient intensity
 			tRange = 1 - minAmbientPoint;
-			dot = Mathf.Clamp01((Vector3.Dot(mainLight.transform.forward, Vector3.down) - minAmbientPoint) / tRange);
+			dot = Mathf.Clamp01((forwardDownDot - minAmbientPoint) / tRange);
 			i = ((maxAmbient - minAmbient) * dot) + minAmbient;
 			RenderSettings.ambientIntensity = i;
 
@@ -81,23 +84,5 @@ namespace TimeWalk.Platform
 			if (Input.GetKeyDown(KeyCode.Q)) skySpeed *= 0.5f;
 			if (Input.GetKeyDown(KeyCode.E)) skySpeed *= 2f;
 		}
-
-        /*
-        private void UpdateNightAndDay()
-        {
-            if(TWGameManager.instance.IsDayTime)
-            {
-                RenderSettings.skybox = skyDay;
-				RenderSettings.ambientIntensity = dayIntensity;
-				GetComponent<Light>().color = colorSun;
-			}
-            else
-            {
-                RenderSettings.skybox = skyNight;
-                GetComponent<Light>().color = colorMoon;
-				RenderSettings.ambientIntensity = nightIntensity;
-			}
-        }
-        */
     }
 }
