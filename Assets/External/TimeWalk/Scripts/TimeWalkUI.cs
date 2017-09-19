@@ -22,8 +22,8 @@ namespace TimeWalk.Platform
         private GameObject handle;
         private GameObject helpMenu;
         private float lastClockUpdate = 0f;
-        private Range levelYearRange; //x=min,y=max
-        private Range slidePixelRange; //x=min,y=max
+        private TWRange levelYearRange; //x=min,y=max
+        private TWRange slidePixelRange; //x=min,y=max
         private float showHelpTime;
         private float showHelpDuration = 10f;
         private float levelLoadTime;
@@ -108,8 +108,7 @@ namespace TimeWalk.Platform
         // Update is called once per frame
         void Update()
         {
-            // Update time every 1s
-            if (Time.timeSinceLevelLoad - lastClockUpdate > 1.0f)
+            if (Time.timeSinceLevelLoad - lastClockUpdate > 0.5f)
             {
                 UpdateTime();
                 lastClockUpdate = Time.timeSinceLevelLoad;
@@ -182,10 +181,10 @@ namespace TimeWalk.Platform
             int maxYear = levels[0].year;
             int minYear = levels[levels.Count - 1].year;
 
-            levelYearRange = new Range(minYear, maxYear);
+            levelYearRange = new TWRange(minYear, maxYear);
             // Figured out the appropriate pixel range through trial and error...
             // There MUST be a better way.
-            slidePixelRange = new Range(levelItemHeight * 2, sliderRect.height + levelItemHeight + 10);
+            slidePixelRange = new TWRange(levelItemHeight * 2, sliderRect.height + levelItemHeight + 10);
 
             ClearLevels();
 
@@ -331,64 +330,5 @@ namespace TimeWalk.Platform
 
     }
 
-	//<summary>Represents range of float values<summary>
-	public class Range
-	{
-		public Range(float min, float max)
-		{
-			this.min = min;
-			this.max = max;
-		}
-
-        private float min;
-        private float max;
-
-        public float Min 
-        { 
-            get
-            {
-                return min;    
-            } 
-        }
-
-		public float Max
-		{
-			get
-			{
-				return max;
-			}
-		}
-
-        public float Delta()
-        {
-            return this.max - this.min;
-        }
-
-		//<summary>Translates value from Range to target Range</summary>
-		//<param name=x>Value from the current Range to translate</param>
-		//<param name=targetRange>The range to which x should be translated</param>
-		public float Translate(float x, Range targetRange)
-		{
-            if (this.Delta() <= 0f)
-			{
-				throw new ArgumentException(String.Format("current range does not have a positive delta"));
-			}
-
-            if (targetRange.Delta() <= 0f)
-            {
-				throw new ArgumentException(String.Format("target does not have a positive delta"));
-            }
-
-			if (x > max || x < min)
-			{
-                throw new ArgumentException(String.Format("x ({0}) is out of current range", x));
-			}
-
-            float ratio = targetRange.Delta() / Delta();
-            float converted = ratio * (max - x);
-            float translated = targetRange.max - converted;
-            // Debug.Log(String.Format("{0} in range ({4},{5}) translated to range ({1},{2}) is {3}", x, targetRange.min, targetRange.max, translated, min, max));
-            return translated;
-		}
-	}
+	
 }

@@ -18,7 +18,7 @@ namespace TimeWalk.Platform {
         public event Action TWPauseToggled;
 
 		public static float startTimeHours = 12.0f; // noon
-		public static float timeSpeedUp = 12.0f; // 1 hour = 12 hours
+		public static float timeSpeedUpHours = 12.0f; // 1 real hour = 12 world hours
 
         private static float secondsToHours = 1f / 3600f;
 		private TWLocationInfo timeWalkLocationInfo = null;
@@ -106,7 +106,7 @@ namespace TimeWalk.Platform {
 
             timeWalkLocationInfo = locationInfo;
             startTimeHours = locationInfo.startTimeHours;
-            timeSpeedUp = locationInfo.timeSpeedUp;
+            timeSpeedUpHours = locationInfo.timeSpeedUp;
 
             if (TWLocationInfoChanged != null)
             {   
@@ -229,7 +229,7 @@ namespace TimeWalk.Platform {
 
         void Update()
         {
-            currentTimeHours += Time.deltaTime * timeSpeedUp * secondsToHours;
+            currentTimeHours += Time.deltaTime * timeSpeedUpHours * secondsToHours;
             if (currentTimeHours > 24.0f)
             {
                 currentTimeHours %= 24.0f;
@@ -253,6 +253,10 @@ namespace TimeWalk.Platform {
                     TWNightDayChanged();    
                 }  
             }
+
+            // Temp
+            if (Input.GetKeyDown(KeyCode.F1)) timeSpeedUpHours *= 0.5f;
+            if (Input.GetKeyDown(KeyCode.F2)) timeSpeedUpHours *= 2f;
         }
 
         private void OnEnable()
@@ -407,7 +411,7 @@ namespace TimeWalk.Platform {
         public Boolean isNight = false;
         public Boolean isColor = true;
         public float startTimeHours = TWGameManager.startTimeHours;
-        public float timeSpeedUp = TWGameManager.timeSpeedUp;
+        public float timeSpeedUp = TWGameManager.timeSpeedUpHours;
 
     }
 }
