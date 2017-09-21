@@ -10,6 +10,8 @@ namespace TimeWalk.Platform
     //<summary>Controls night and day skyboxes and sun/moon position</summary>
     public class TWNightAndDay : MonoBehaviour
     {
+        public Transform stars;
+
         // Sun color from min to max intensity
         public Gradient nightDayColor;
 
@@ -21,11 +23,14 @@ namespace TimeWalk.Platform
         // 1 is directly above, 0 is directly at the horizon, -1 is directly below
         public float intensityCutOff = -0.2f;
 
-		public float maxAmbient = 1f;
+        // Point at which sun is below horizon and flare should start disappearing
+        public float flareReductionPoint = -0.06f;
+
+        public float maxAmbient = 1f;
 		public float minAmbient = 0f;
         // The point at which the sun is below the horizon and ambient light should be "off".
         public float ambientCutOff = -0.2f;
-        
+
 		public Gradient nightDayFogColor;
 		public AnimationCurve fogDensityCurve;
 		public float fogScale = 1f;
@@ -36,12 +41,16 @@ namespace TimeWalk.Platform
 		public Vector3 dayRotateSpeed;
 		public Vector3 nightRotateSpeed;
 
+        LensFlare flare;
+        float flareBrightness;
 		float skySpeed = 1;
 
         TWRange twentyFour;
         TWRange fullRotation;
+        TWRange flareBrightnessRange;
+        TWRange downRangeForFlare;
 
-		Light mainLight;
+        Light mainLight;
 		Material skyMat;
 
         // Use this for initialization
@@ -49,10 +58,14 @@ namespace TimeWalk.Platform
         {
             skyMat = RenderSettings.skybox;
             mainLight = GetComponent<Light>();
+            flare = GetComponent<LensFlare>();
+            flareBrightness = flare.brightness;
             skySpeed = TWGameManager.timeSpeedUpHours / 3600;
 
             twentyFour = new TWRange(0f, 24f);
             fullRotation = new TWRange(0f, 360f);
+            flareBrightnessRange = new TWRange(0f, flareBrightness);
+            downRangeForFlare = new TWRange(intensityCutOff, 0f);
 
             RotateSun();
             TWGameManager.instance.TWNightDayChanged += RotateSun;
@@ -94,7 +107,31 @@ namespace TimeWalk.Platform
 
             // Update main light rotation
             RotateSun();
-		}
+
+            // Update flare color and make sure it is off when sun is below horizon
+            if(down > flareReductionPoint)
+            {
+                flare.enabled = true;
+                flare.color = mainLight.color;
+                if(down < 0f)
+                {
+                    flare.brightness = Mathf.Clamp(downRangeForFlare.Translate(down, flareBrightnessRange), 0f, flareBrightness);
+                }
+            }
+            else
+            {
+                flare.enabled = false;
+                flare.brightness = flareBrightness;
+            }
+
+            // Update stars with same rotation
+            if (stars != null)
+            {
+                stars.transform.rotation = transform.rotation;
+            }
+
+            // TODO Update moon
+        }
 
         private void RotateSun()
         {
