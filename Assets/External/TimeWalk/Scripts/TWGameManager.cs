@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TimeWalk.Platform {
+namespace TimeWalk.Platform
+{
     using System;
     using UnityEngine.UI;
     using UnityEngine.SceneManagement;
@@ -11,17 +12,17 @@ namespace TimeWalk.Platform {
     {
         public static TWGameManager instance = null;
 
-		public event Action TWLocationInfoChanged;
-		public event Action TWLevelsChanged;
-		public event Action TWLevelChanged;
+        public event Action TWLocationInfoChanged;
+        public event Action TWLevelsChanged;
+        public event Action TWLevelChanged;
         public event Action TWNightDayChanged;
         public event Action TWPauseToggled;
 
-		public static float startTimeHours = 12.0f; // noon
-		public static float timeSpeedUpHours = 12.0f; // 1 real hour = 12 world hours
+        public static float startTimeHours = 12.0f; // noon
+        public static float timeSpeedUpHours = 12.0f; // 1 real hour = 12 world hours
 
         private static float secondsToHours = 1f / 3600f;
-		private TWLocationInfo timeWalkLocationInfo = null;
+        private TWLocationInfo timeWalkLocationInfo = null;
         private List<TWLevel> timeWalkLevels = null;
         private TWLevel previousLevel = null;
         private Boolean previousLevelUnloading = false;
@@ -32,13 +33,13 @@ namespace TimeWalk.Platform {
         private Boolean isPaused = false;
 
 
-		public List<TWLevel> TimeWalkLevels
-		{
-			get
-			{
-				return timeWalkLevels;
-			}
-		}
+        public List<TWLevel> TimeWalkLevels
+        {
+            get
+            {
+                return timeWalkLevels;
+            }
+        }
 
         public TWLevel CurrentLevel
         {
@@ -49,19 +50,19 @@ namespace TimeWalk.Platform {
         }
 
         //<summary>Current time in hours</summary>
-		public float CurrentTimeHours
-		{
-			get
-			{
-				return currentTimeHours;
-			}
-		}
+        public float CurrentTimeHours
+        {
+            get
+            {
+                return currentTimeHours;
+            }
+        }
 
         public Boolean IsDayTime
         {
             get
             {
-                return isDayTime;    
+                return isDayTime;
             }
         }
 
@@ -73,13 +74,13 @@ namespace TimeWalk.Platform {
             }
         }
 
-		public TWLocationInfo TimeWalkLocationInfo
-		{
-			get
-			{
-				return timeWalkLocationInfo;
-			}
-		}
+        public TWLocationInfo TimeWalkLocationInfo
+        {
+            get
+            {
+                return timeWalkLocationInfo;
+            }
+        }
 
         public Boolean DataReady()
         {
@@ -93,13 +94,14 @@ namespace TimeWalk.Platform {
             TWLevel level = null;
             timeWalkLevels.ForEach(delegate (TWLevel l)
             {
-                if(l.year == year) {
+                if (l.year == year)
+                {
                     level = l;
                 }
             });
             return level;
         }
-        
+
         public void OnLocationInfoChanged(TWLocationInfo locationInfo)
         {
             if (locationInfo == null) return;
@@ -109,7 +111,7 @@ namespace TimeWalk.Platform {
             timeSpeedUpHours = locationInfo.timeSpeedUp;
 
             if (TWLocationInfoChanged != null)
-            {   
+            {
                 TWLocationInfoChanged();
             }
         }
@@ -118,37 +120,37 @@ namespace TimeWalk.Platform {
         {
             if (levels == null) return;
 
-			timeWalkLevels = levels;
+            timeWalkLevels = levels;
 
             timeWalkLevels.Sort();
 
-			if (TWLevelsChanged != null)
-			{
-				TWLevelsChanged();
-			}
+            if (TWLevelsChanged != null)
+            {
+                TWLevelsChanged();
+            }
 
-			SetCurrentLevel();
+            SetCurrentLevel();
 
             ResetNonCurrentLevels();
         }
 
         public void OnTimeWalkLevelChanged(TWLevel newLevel)
-		{
+        {
             if (newLevel == null) return;
 
             SetCurrentLevel(newLevel);
-		}
+        }
 
-		public void OnTimeWalkLevelChanged()
-		{
+        public void OnTimeWalkLevelChanged()
+        {
             if (timeWalkLevels == null) return;
 
             int newLevelIdx = -1;
             for (int i = 0; i < timeWalkLevels.Count; i++)
             {
-                if(timeWalkLevels[i].year == currentLevel.year)
+                if (timeWalkLevels[i].year == currentLevel.year)
                 {
-                    newLevelIdx = (i == 0) ? 
+                    newLevelIdx = (i == 0) ?
                         timeWalkLevels.Count - 1 : i - 1;
                     break;
                 }
@@ -158,19 +160,20 @@ namespace TimeWalk.Platform {
             {
                 OnTimeWalkLevelChanged(timeWalkLevels[newLevelIdx]);
             }
-		}
+        }
 
         public void OnNightDayToggled()
         {
             // day == 6am-8pm
-            if (isDayTime) {
+            if (isDayTime)
+            {
                 // Switch to night (8:xx pm)
                 currentTimeHours = 20f + (currentTimeHours % 1);
             }
             else
             {
                 // Switch to day (10:xx am)
-				currentTimeHours = 10f + (currentTimeHours % 1);
+                currentTimeHours = 10f + (currentTimeHours % 1);
             }
         }
 
@@ -179,16 +182,16 @@ namespace TimeWalk.Platform {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
-		public void OnQuit()
-		{
-			Application.Quit();
-		}
+        public void OnQuit()
+        {
+            Application.Quit();
+        }
 
         public void OnPause(Boolean pause)
         {
             Time.timeScale = pause ? 0 : 1;
             isPaused = pause;
-            if(TWPauseToggled != null)
+            if (TWPauseToggled != null)
             {
                 TWPauseToggled();
             }
@@ -205,7 +208,7 @@ namespace TimeWalk.Platform {
         }
 
 
-		void Awake()
+        void Awake()
         {
             // TODO Probably don't need singleton if we have a master scene
 
@@ -237,21 +240,21 @@ namespace TimeWalk.Platform {
 
             Boolean oldIsDayTime = isDayTime;
 
-            if(currentTimeHours >= 6f && currentTimeHours < 20f)
+            if (currentTimeHours >= 6f && currentTimeHours < 20f)
             {
                 isDayTime = true;
-            } 
+            }
             else
             {
                 isDayTime = false;
             }
 
-            if(oldIsDayTime != isDayTime) 
+            if (oldIsDayTime != isDayTime)
             {
-                if(TWNightDayChanged != null)
+                if (TWNightDayChanged != null)
                 {
-                    TWNightDayChanged();    
-                }  
+                    TWNightDayChanged();
+                }
             }
 
             // Temp
@@ -261,8 +264,8 @@ namespace TimeWalk.Platform {
 
         private void OnEnable()
         {
-			SceneManager.sceneLoaded += OnSceneLoaded;
-			SceneManager.sceneUnloaded += OnSceneUnLoaded;
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.sceneUnloaded += OnSceneUnLoaded;
         }
 
         private void OnDisable()
@@ -278,9 +281,9 @@ namespace TimeWalk.Platform {
             previousLevel = currentLevel;
             currentLevel = newLevel;
 
-			Debug.Log(String.Format("Level change from {0} to {1}",
-								previousLevel != null ? previousLevel.levelSceneName : "null",
-								currentLevel != null ? currentLevel.levelSceneName : "null"));
+            Debug.Log(String.Format("Level change from {0} to {1}",
+                                previousLevel != null ? previousLevel.levelSceneName : "null",
+                                currentLevel != null ? currentLevel.levelSceneName : "null"));
             ProcessLevelChange();
         }
 
@@ -291,18 +294,18 @@ namespace TimeWalk.Platform {
             TWLevel newLevel = null;
 
             timeWalkLevels.ForEach(delegate (TWLevel l)
-			{
-				if (l.isDefault)
-				{
-					newLevel = l;
-				}
-			});
+            {
+                if (l.isDefault)
+                {
+                    newLevel = l;
+                }
+            });
 
-			// Just pick first level if no defaults
-			if (newLevel == null)
-			{
-				newLevel = timeWalkLevels[0];
-			}
+            // Just pick first level if no defaults
+            if (newLevel == null)
+            {
+                newLevel = timeWalkLevels[0];
+            }
 
             SetCurrentLevel(newLevel);
         }
@@ -310,66 +313,68 @@ namespace TimeWalk.Platform {
         private void ProcessLevelChange()
         {
             // If current exists and isn't already loading or loaded, load it
-            if(currentLevel != null)
+            if (currentLevel != null)
             {
                 Scene currentLevelScene = SceneManager.GetSceneByName(currentLevel.levelSceneName);
-                if(currentLevelLoading) 
+                if (currentLevelLoading)
                 {
                     // Make sure it is valid
-                    if(currentLevelScene.IsValid()) {
-                        if(currentLevelScene.isLoaded) {
-                            
-                            currentLevelLoading = false;
-							
-                            // New scene ready
-							if (TWLevelChanged != null)
-							{
-								TWLevelChanged();
-							}
-                        } 
-                    } 
-                    else 
+                    if (currentLevelScene.IsValid())
                     {
-                        Debug.LogError("Unable to load " + currentLevelScene.name);    
+                        if (currentLevelScene.isLoaded)
+                        {
+
+                            currentLevelLoading = false;
+
+                            // New scene ready
+                            if (TWLevelChanged != null)
+                            {
+                                TWLevelChanged();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError("Unable to load " + currentLevelScene.name);
                     }
                 }
                 else
-                if(!currentLevelScene.isLoaded)
+                if (!currentLevelScene.isLoaded)
                 {
-					// Load new scene
-					SceneManager.LoadSceneAsync(currentLevel.levelSceneName, LoadSceneMode.Additive);
+                    // Load new scene
+                    SceneManager.LoadSceneAsync(currentLevel.levelSceneName, LoadSceneMode.Additive);
                     currentLevelLoading = true;
                 }
             }
 
-			// If previous exists and is loaded, unload it
-			if (previousLevel != null)
-			{
+            // If previous exists and is loaded, unload it
+            if (previousLevel != null)
+            {
                 Scene previousLevelScene = SceneManager.GetSceneByName(previousLevel.levelSceneName);
-				if (previousLevelUnloading)
-				{
-                    if(!previousLevelScene.isLoaded)
-					{
+                if (previousLevelUnloading)
+                {
+                    if (!previousLevelScene.isLoaded)
+                    {
                         // Old scene unloaded
                         previousLevelUnloading = false;
-						previousLevel = null;
-					}
-				}
-				else
-				{
-					SceneManager.UnloadSceneAsync(previousLevel.levelSceneName);
+                        previousLevel = null;
+                    }
+                }
+                else
+                {
+                    SceneManager.UnloadSceneAsync(previousLevel.levelSceneName);
                     previousLevelUnloading = true;
-				}
-			}
+                }
+            }
         }
 
-		private void ResetNonCurrentLevels()
-		{
-			if (timeWalkLevels == null) return;
+        private void ResetNonCurrentLevels()
+        {
+            if (timeWalkLevels == null) return;
 
-			timeWalkLevels.ForEach(delegate (TWLevel l)
-			{
-                if(l.levelSceneName != currentLevel.levelSceneName)
+            timeWalkLevels.ForEach(delegate (TWLevel l)
+            {
+                if (l.levelSceneName != currentLevel.levelSceneName)
                 {
                     Scene levelScene = SceneManager.GetSceneByName(l.levelSceneName);
                     if (levelScene.isLoaded)
@@ -377,8 +382,8 @@ namespace TimeWalk.Platform {
                         SceneManager.UnloadSceneAsync(levelScene.name);
                     }
                 }
-			});
-		}
+            });
+        }
     }
 
 
@@ -389,16 +394,16 @@ namespace TimeWalk.Platform {
         public int year;
         public string label;
         public Boolean isDefault;
-		public string levelSceneName;
+        public string levelSceneName;
 
         public int CompareTo(object obj)
         {
             if (obj == null) return 1;
             TWLevel otherLevel = obj as TWLevel;
-			if (otherLevel != null)
-				return -1 * this.year.CompareTo(otherLevel.year);
-			else
-				throw new ArgumentException("Object is not a TWLevel");
+            if (otherLevel != null)
+                return -1 * this.year.CompareTo(otherLevel.year);
+            else
+                throw new ArgumentException("Object is not a TWLevel");
         }
     }
 

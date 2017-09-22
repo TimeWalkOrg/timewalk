@@ -17,8 +17,8 @@ namespace TimeWalk.Platform
 
         public float sunrise = 7.5f;
 
-		public float maxIntensity = 3f;
-		public float minIntensity = 0f;
+        public float maxIntensity = 3f;
+        public float minIntensity = 0f;
         // The point at which the sun is below the horizon and effectively "off".
         // 1 is directly above, 0 is directly at the horizon, -1 is directly below
         public float intensityCutOff = -0.2f;
@@ -27,23 +27,23 @@ namespace TimeWalk.Platform
         public float flareReductionPoint = -0.06f;
 
         public float maxAmbient = 1f;
-		public float minAmbient = 0f;
+        public float minAmbient = 0f;
         // The point at which the sun is below the horizon and ambient light should be "off".
         public float ambientCutOff = -0.2f;
 
-		public Gradient nightDayFogColor;
-		public AnimationCurve fogDensityCurve;
-		public float fogScale = 1f;
+        public Gradient nightDayFogColor;
+        public AnimationCurve fogDensityCurve;
+        public float fogScale = 1f;
 
-		public float dayAtmosphereThickness = 0.4f;
-		public float nightAtmosphereThickness = 0.87f;
+        public float dayAtmosphereThickness = 0.4f;
+        public float nightAtmosphereThickness = 0.87f;
 
-		public Vector3 dayRotateSpeed;
-		public Vector3 nightRotateSpeed;
+        public Vector3 dayRotateSpeed;
+        public Vector3 nightRotateSpeed;
 
         LensFlare flare;
         float flareBrightness;
-		float skySpeed = 1;
+        float skySpeed = 1;
 
         TWRange twentyFour;
         TWRange fullRotation;
@@ -51,7 +51,7 @@ namespace TimeWalk.Platform
         TWRange downRangeForFlare;
 
         Light mainLight;
-		Material skyMat;
+        Material skyMat;
 
         // Use this for initialization
         void Start()
@@ -81,39 +81,39 @@ namespace TimeWalk.Platform
             // gives us the inverse (1 is down, -1 is up)
             float down = Vector3.Dot(mainLight.transform.forward, Vector3.down);
 
-			// Update sun intensity
-			float tRange = 1 - intensityCutOff;
+            // Update sun intensity
+            float tRange = 1 - intensityCutOff;
             float dot = Mathf.Clamp01((down - intensityCutOff) / tRange);
-			float i = ((maxIntensity - minIntensity) * dot) + minIntensity;
-			mainLight.intensity = i;
+            float i = ((maxIntensity - minIntensity) * dot) + minIntensity;
+            mainLight.intensity = i;
 
-			// Update ambient intensity
-			tRange = 1 - ambientCutOff;
+            // Update ambient intensity
+            tRange = 1 - ambientCutOff;
             dot = Mathf.Clamp01((down - ambientCutOff) / tRange);
-			i = ((maxAmbient - minAmbient) * dot) + minAmbient;
-			RenderSettings.ambientIntensity = i;
+            i = ((maxAmbient - minAmbient) * dot) + minAmbient;
+            RenderSettings.ambientIntensity = i;
 
-			// Update light color
-			mainLight.color = nightDayColor.Evaluate(dot);
-			RenderSettings.ambientLight = mainLight.color;
+            // Update light color
+            mainLight.color = nightDayColor.Evaluate(dot);
+            RenderSettings.ambientLight = mainLight.color;
 
-			// Update fog
-			RenderSettings.fogColor = nightDayFogColor.Evaluate(dot);
-			RenderSettings.fogDensity = fogDensityCurve.Evaluate(dot) * fogScale;
+            // Update fog
+            RenderSettings.fogColor = nightDayFogColor.Evaluate(dot);
+            RenderSettings.fogDensity = fogDensityCurve.Evaluate(dot) * fogScale;
 
-			// Update atmosphere thickness
-			i = ((dayAtmosphereThickness - nightAtmosphereThickness) * dot) + nightAtmosphereThickness;
-			skyMat.SetFloat("_AtmosphereThickness", i);
+            // Update atmosphere thickness
+            i = ((dayAtmosphereThickness - nightAtmosphereThickness) * dot) + nightAtmosphereThickness;
+            skyMat.SetFloat("_AtmosphereThickness", i);
 
             // Update main light rotation
             RotateSun();
 
             // Update flare color and make sure it is off when sun is below horizon
-            if(down > flareReductionPoint)
+            if (down > flareReductionPoint)
             {
                 flare.enabled = true;
                 flare.color = mainLight.color;
-                if(down < 0f)
+                if (down < 0f)
                 {
                     flare.brightness = Mathf.Clamp(downRangeForFlare.Translate(down, flareBrightnessRange), 0f, flareBrightness);
                 }
