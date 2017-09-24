@@ -7,8 +7,6 @@
     "TimeWalk"
   ],
   "dependencies": [
-    "https://www.dropbox.com/s/4rfzhr09d3jee4d/Standard%20Assets-v0.2.unitypackage?dl=1",
-    "https://www.dropbox.com/s/kjvngfgltk5bu1h/SampleScenes-v0.1.unitypackage?dl=1",
-    "https://www.dropbox.com/s/63493swk552x7px/Fonts-v0.1.unitypackage?dl=1"
+    "https://www.dropbox.com/s/r9hdq1bepjnadc2/TimeWalk-External-v0.1.unitypackage?dl=1"
   ]
 }
