@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TimeWalk.Platform {
+namespace TimeWalk.Platform
+{
     public class TWLoader : MonoBehaviour
     {
 
@@ -12,15 +13,15 @@ namespace TimeWalk.Platform {
 
         public TWLocationInfo timeWalkLocationInfo = null;
         public List<TWLevel> timeWalkLevels = null;
-        
+
         void Awake()
-        {       
+        {
             if (timeWalkLocationInfo == null)
             {
                 timeWalkLocationInfo = new TWLocationInfo();
             }
 
-            if(timeWalkLevels == null)
+            if (timeWalkLevels == null)
             {
                 timeWalkLevels = new List<TWLevel>();
             }

@@ -38,5 +38,7 @@ sysinfo.txt
 /Builds/Packages
 /Assets/External.meta*
 /Assets/External/*
+# Except this one
+!/Assets/External/TimeWalk
 
 .DS_Store

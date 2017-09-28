@@ -5,7 +5,7 @@
 1. Clone repo
 1. Open project in Unity
 1. Run `Assets -> External Package Manager -> Import All`
-1. Load `Assets/Scenes/Test.unity`
+1. Load `Assets/Example/Scenes/Master.unity`
 
 
 ## For More

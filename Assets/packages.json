@@ -1,15 +1,12 @@
 ﻿{
-  "version": "0.1",
+  "version": "0.3",
   "exports": [
     "Standard Assets",
     "SampleScenes",
     "Fonts",
-    "Day Night Cycle"
+    "TimeWalk"
   ],
   "dependencies": [
-    "https://www.dropbox.com/s/t2o3a72458p2thr/Standard%20Assets-v0.1.unitypackage?dl=1",
-    "https://www.dropbox.com/s/9s2xg063jceqtbq/SampleScenes-v0.1.unitypackage?dl=1",
-    "https://www.dropbox.com/s/kasmhyagx0ns336/Fonts-v0.1.unitypackage?dl=1",
-    "https://www.dropbox.com/s/0wnw8l119et7rtm/Day%20Night%20Cycle-v0.1.unitypackage?dl=1"
+    "https://www.dropbox.com/s/r9hdq1bepjnadc2/TimeWalk-External-v0.1.unitypackage?dl=1"
   ]
 }
