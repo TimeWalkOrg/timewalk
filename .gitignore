@@ -24,6 +24,9 @@ ExportedObj/
 *.svd
 *.pdb
 
+# Tabs Studio
+*.tss
+
 # Unity3D generated meta files
 *.pidb.meta
 
