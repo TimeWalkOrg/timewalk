@@ -15,15 +15,15 @@ namespace TimeWalk.Platform
         {
             firstPersonController = GetComponent<FirstPersonController>();
 
-			// Subscribe to changes
-			TWGameManager.instance.TWPauseToggled += HandleTogglePause;
+            // Subscribe to changes
+            TWGameManager.instance.TWPauseToggled += HandleTogglePause;
         }
 
-		void OnDisable()
-		{
-			// Unsubscribe to changes
-			TWGameManager.instance.TWPauseToggled -= HandleTogglePause;
-		}
+        void OnDisable()
+        {
+            // Unsubscribe to changes
+            TWGameManager.instance.TWPauseToggled -= HandleTogglePause;
+        }
 
         void HandleTogglePause()
         {
