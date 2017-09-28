@@ -1,3 +1,4 @@
+[![GitHub release](https://img.shields.io/github/release/TimeWalkOrg/timewalk.svg)]()
 # TimeWalk
 
 ## Getting Started With Platform Development
