@@ -413,6 +413,7 @@ namespace TimeWalk.Platform
         // Will need to rethink city and state for international locations
         public string city;
         public string state;
+        public Vector2 latLongOrigin;
         public Boolean isNight = false;
         public Boolean isColor = true;
         public float startTimeHours = TWGameManager.startTimeHours;
